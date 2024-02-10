@@ -10,6 +10,7 @@ import config from "./config";
 
 import GlobalErrorHandler from "./controllers/errorController";
 import NotFound from "./Errors/NotFound";
+import router from "./routers/router";
 
 // GLOBAL MIDDLEWARES
 const app = express();
@@ -37,6 +38,8 @@ app.use(MongoSanitize());
 // Parse Json data with incoming requests
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use("/api/v1", router);
 
 app.all("*", () => {
   NotFound();
