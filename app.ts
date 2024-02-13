@@ -9,8 +9,8 @@ import helmet from "helmet";
 import config from "./config";
 
 import GlobalErrorHandler from "./controllers/errorController";
-import NotFound from "./Errors/NotFound";
 import router from "./routers/router";
+import NotFoundError from "./Errors/NotFoundError";
 
 // GLOBAL MIDDLEWARES
 const app = express();
@@ -42,7 +42,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1", router);
 
 app.all("*", () => {
-  NotFound();
+  throw new NotFoundError();
 });
 
 app.use(GlobalErrorHandler);

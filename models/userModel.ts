@@ -26,7 +26,7 @@ export interface UserTypes extends mongoose.Document {
     inputPassword: string,
     userPassword: string
   ) => Promise<boolean>; // The type has to be specified in this format because the method is a promise
-  checkPasswordAfter(JWTTimestamp: number): boolean;
+  changedPasswordAfter(JWTTimestamp: number): boolean;
   createPasswordResetToken(): string;
   createVerificationToken(): string;
 }
@@ -129,7 +129,7 @@ userSchema.methods.checkPassword = async function (
 };
 
 // Check if use changed password after token was issued
-userSchema.methods.checkPasswordAfter = function (
+userSchema.methods.changedPasswordAfter = function (
   JWTTimestamp: number
 ): boolean {
   if (this.passwordChangedAt) {
