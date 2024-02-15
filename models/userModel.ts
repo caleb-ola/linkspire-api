@@ -149,7 +149,9 @@ userSchema.methods.createPasswordResetToken = function () {
     .update(resetToken)
     .digest("hex");
 
-  this.passwordResetExpires = Date.now() * 10 * 60 * 1000;
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+  return resetToken;
 };
 
 // Create verification token and update verification token expiry date
@@ -161,7 +163,9 @@ userSchema.methods.createVerificationToken = function () {
     .update(token)
     .digest("hex");
 
-  this.verificationTokenExpires = Date.now() * 10 * 60 * 1000;
+  this.verificationTokenExpires = Date.now() + 10 * 60 * 1000;
+
+  return token;
 };
 
 const User = mongoose.model<UserTypes>("User", userSchema);

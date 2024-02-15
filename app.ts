@@ -10,7 +10,7 @@ import config from "./config";
 
 import GlobalErrorHandler from "./controllers/errorController";
 import router from "./routers/router";
-import NotFoundError from "./Errors/NotFoundError";
+import NotFoundError from "./Errors/notFoundError";
 
 // GLOBAL MIDDLEWARES
 const app = express();
