@@ -9,8 +9,11 @@ import helmet from "helmet";
 import config from "./config";
 
 import GlobalErrorHandler from "./controllers/errorController";
-import router from "./routers/router";
 import NotFoundError from "./Errors/notFoundError";
+import AppError from "./Errors/appError";
+
+import routers from "./routers/router";
+import BadRequestError from "./Errors/badRequestError";
 
 // GLOBAL MIDDLEWARES
 const app = express();
@@ -39,10 +42,10 @@ app.use(MongoSanitize());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/v1", router);
+app.use("/api/v1", routers);
 
 app.all("*", () => {
-  throw new NotFoundError();
+  throw new BadRequestError("Route not found");
 });
 
 app.use(GlobalErrorHandler);

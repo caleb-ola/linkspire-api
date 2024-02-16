@@ -19,7 +19,7 @@ export interface UserTypes extends mongoose.Document {
   passwordResetToken: string | undefined;
   passwordResetExpires: string | undefined;
   isVerified: boolean;
-  isActive: boolean;
+  active: boolean;
   verificationToken: string | undefined;
   verificationTokenExpires: string | undefined;
   checkPassword: (
@@ -69,14 +69,14 @@ const userSchema = new mongoose.Schema<UserTypes>(
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
-    isActive: {
+    active: {
       type: Boolean,
-      default: false,
+      default: true,
       select: false,
     },
     isVerified: {
       type: Boolean,
-      select: false,
+      default: false,
     },
     verificationToken: String,
     verificationTokenExpires: Date,
@@ -97,7 +97,7 @@ const userSchema = new mongoose.Schema<UserTypes>(
 
 // Only return users that are active
 userSchema.pre(/^find/, function (this: Query<UserTypes[], UserTypes>, next) {
-  this.find({ isActive: { $ne: false } });
+  this.find({ active: { $ne: false } });
 
   next();
 });

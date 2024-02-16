@@ -62,4 +62,8 @@ export default class Email {
   async sendEmailVerification() {
     await this.send("verify", "Confirm your LinkSpire account");
   }
+
+  async welcomeBack() {
+    await this.send("welcomeBack", "");
+  }
 }
