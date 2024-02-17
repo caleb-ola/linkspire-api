@@ -114,3 +114,9 @@ export const login: RequestHandler = AsyncHandler(async (req, res, next) => {
 
   createSendToken(existingUser, 200, res);
 });
+
+export const resendVerification: RequestHandler = AsyncHandler(
+  async (req, res, next) => {
+    const { email } = req.body;
+  }
+);
