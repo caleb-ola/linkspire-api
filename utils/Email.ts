@@ -64,6 +64,10 @@ export default class Email {
   }
 
   async welcomeBack() {
-    await this.send("welcomeBack", "");
+    await this.send("welcomeBack", "Welcome to LinkSpire! Let's Dive In!");
+  }
+
+  async sendForgotPassword() {
+    await this.send("forgotPassword", "");
   }
 }

@@ -6,7 +6,6 @@ import AsyncHandler from "../utils/asyncHandler";
 import User from "../models/userModel";
 import BadRequestError from "../Errors/badRequestError";
 import Email from "../utils/Email";
-import AppError from "../Errors/appError";
 
 // Generate a token
 const generateToken = (id: string, email: string) => {
@@ -35,7 +34,7 @@ const createSendToken = async (
   });
 };
 
-// Signup a new user and send confirmation to their email
+// Signup a new user and send verification link to their email
 export const signup: RequestHandler = AsyncHandler(async (req, res, next) => {
   // Collect user's details
   const { name, email, password, confirmPassword } = req.body;
@@ -52,7 +51,6 @@ export const signup: RequestHandler = AsyncHandler(async (req, res, next) => {
     throw new BadRequestError(
       "User email already exists, please try another email,"
     );
-  console.log({ existingUser });
 
   const newUser = new User({
     name,
@@ -64,9 +62,7 @@ export const signup: RequestHandler = AsyncHandler(async (req, res, next) => {
   // Generate a verification token for the user
   const verificationToken = newUser.createVerificationToken();
 
-  const url = `${req.protocol}//:${req.get(
-    "host"
-  )}/auth/email-verification/${verificationToken}`;
+  const url = `${config.APP_URL}/auth/email-verification/${verificationToken}`;
 
   await new Email(newUser, url).sendEmailVerification();
 
@@ -75,7 +71,9 @@ export const signup: RequestHandler = AsyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     status: "success",
-    message: "We sent a confirmation code to your email address",
+    data: {
+      message: "We sent a verification to your email address",
+    },
   });
 });
 
@@ -110,13 +108,51 @@ export const login: RequestHandler = AsyncHandler(async (req, res, next) => {
   if (!correctPassword)
     throw new BadRequestError("Username or password incorrect");
 
-  // await new Email(exisitingUser, "").
+  // await new Email(existingUser, "").
 
   createSendToken(existingUser, 200, res);
 });
 
+// Re-send email verification link to user email
 export const resendVerification: RequestHandler = AsyncHandler(
   async (req, res, next) => {
     const { email } = req.body;
+
+    // Check if user exists
+    const existingUser = await User.findOne({ email });
+    if (!existingUser)
+      throw new BadRequestError(
+        "Email does not exist, please proceed to signup"
+      );
+
+    const verificationToken = existingUser.createVerificationToken();
+
+    const url = `${config.APP_URL}/auth/email-verification/${verificationToken}`;
+
+    await new Email(existingUser, url).sendEmailVerification();
+
+    await existingUser.save();
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        message: "We sent a verification to your email",
+      },
+    });
+  }
+);
+
+//Forgot password and send password reset link
+export const forgotPassword: RequestHandler = AsyncHandler(
+  async (req, res, next) => {
+    const { email } = req.body;
+
+    // Check if user exists
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) throw new BadRequestError("User with email not found");
+
+    const passwordResetToken = existingUser.createPasswordResetToken();
+
+    const url = `${config.APP_URL}/auth/email-verification/${passwordResetToken}`;
   }
 );
