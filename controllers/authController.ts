@@ -1,11 +1,16 @@
 import jwt from "jsonwebtoken";
 import config from "../config";
-import { RequestHandler, Response } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import { DateTime } from "luxon";
 import AsyncHandler from "../utils/asyncHandler";
 import User from "../models/userModel";
 import BadRequestError from "../Errors/badRequestError";
 import Email from "../utils/Email";
+import crypto from "crypto";
+
+interface CustomRequest extends Request {
+  currentUser?: any;
+}
 
 // Generate a token
 const generateToken = (id: string, email: string) => {
@@ -108,7 +113,7 @@ export const login: RequestHandler = AsyncHandler(async (req, res, next) => {
   if (!correctPassword)
     throw new BadRequestError("Username or password incorrect");
 
-  // await new Email(existingUser, "").
+  await new Email(existingUser, "").welcomeBack();
 
   createSendToken(existingUser, 200, res);
 });
@@ -142,10 +147,46 @@ export const resendVerification: RequestHandler = AsyncHandler(
   }
 );
 
+// Login a user after verifying their email and send welcome (new user) email
+export const verifyEmail: RequestHandler = AsyncHandler(
+  async (req, res, next) => {
+    const { token } = req.body;
+    if (!token) throw new BadRequestError("Token is required");
+
+    const verifiedToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+
+    const user = await User.findOne({
+      verificationToken: verifiedToken,
+      verificationTokenExpires: { $gt: Date.now() },
+    });
+    if (!user)
+      throw new BadRequestError("Invalid Token. Token may have expired.");
+
+    if (user.isVerified)
+      throw new BadRequestError(
+        "User is already verified, please proceed to login"
+      );
+
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    user.verificationTokenExpires = undefined;
+
+    await new Email(user, "").welcome();
+
+    await user.save();
+
+    createSendToken(user, 200, res);
+  }
+);
+
 //Forgot password and send password reset link
 export const forgotPassword: RequestHandler = AsyncHandler(
   async (req, res, next) => {
     const { email } = req.body;
+    if (!email) throw new BadRequestError("Email is required");
 
     // Check if user exists
     const existingUser = await User.findOne({ email });
@@ -154,5 +195,116 @@ export const forgotPassword: RequestHandler = AsyncHandler(
     const passwordResetToken = existingUser.createPasswordResetToken();
 
     const url = `${config.APP_URL}/auth/email-verification/${passwordResetToken}`;
+
+    await new Email(existingUser, url).sendForgotPassword();
+
+    await existingUser.save();
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        message: "A password reset link was sent to your email",
+      },
+    });
   }
 );
+
+// Reset password using email
+export const resetPassword: RequestHandler = AsyncHandler(
+  async (req, res, next) => {
+    const { password, confirmPassword, token } = req.body;
+
+    if (!password) throw new BadRequestError("Password is required");
+    if (!confirmPassword)
+      throw new BadRequestError("Confirm password is required");
+    if (!token) throw new BadRequestError("Token is required");
+
+    if (password !== confirmPassword)
+      throw new BadRequestError(
+        "Passwords do not match, please check and try again "
+      );
+
+    // Check if token is valid
+    const verifiedToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+
+    const user = await User.findOne({
+      passwordResetToken: verifiedToken,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+    if (!user)
+      throw new BadRequestError("Token invalid. Token may have expired");
+
+    user.password = password;
+    user.passwordChangedAt = Date.now();
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+
+    await new Email(user, "").sendPasswordResetSuccess();
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        message: "Password reset successful",
+      },
+    });
+  }
+);
+
+// Change user password
+export const updatePassword = AsyncHandler(
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
+    const { oldPassword, password, confirmPassword } = req.body;
+
+    if (!oldPassword) throw new BadRequestError("Old password is required");
+    if (!password) throw new BadRequestError("Password is required");
+    if (!confirmPassword)
+      throw new BadRequestError("Confirm password is required");
+    if (password !== confirmPassword)
+      throw new BadRequestError("Passwords do not match");
+
+    const { currentUser } = req;
+    if (!currentUser)
+      throw new BadRequestError("Invalid token, please login again.");
+
+    const user = await User.findOne({ email: req.currentUser.email }).select(
+      "+password"
+    );
+    if (!user) throw new BadRequestError("Invalid token, please log in again.");
+
+    // check if old password is correct
+    const passwordCheck = user.checkPassword(oldPassword, user.password);
+    if (!passwordCheck) throw new BadRequestError("Password is incorrect");
+
+    user.password = password;
+    user.passwordChangedAt = Date.now();
+
+    await new Email(user, "").sendPasswordResetSuccess();
+
+    await user.save();
+
+    createSendToken(user, 200, res);
+  }
+);
+
+// Send test email
+export const sendTestEmail = AsyncHandler(async (req, res, next) => {
+  const user = {
+    firstName: "Dola",
+    email: "dolabomi_enuzh@mailsac.com",
+    username: "Dola Baba",
+    slug: "dola",
+    role: "user",
+  };
+
+  await new Email(user, "").welcomeBack();
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      message: "Test email sent succesfully.",
+    },
+  });
+});

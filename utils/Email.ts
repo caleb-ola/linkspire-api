@@ -60,14 +60,34 @@ export default class Email {
   }
 
   async sendEmailVerification() {
-    await this.send("verify", "Confirm your LinkSpire account");
+    await this.send(
+      "verify",
+      "🚀 Welcome to LinkSpire! Please Verify Your Email 📧"
+    );
+  }
+
+  async welcome() {
+    await this.send("welcome", "🚀 Welcome to LinkSpire! Let's Dive In! 📚");
   }
 
   async welcomeBack() {
-    await this.send("welcomeBack", "Welcome to LinkSpire! Let's Dive In!");
+    await this.send(
+      "welcomeBack",
+      "🎊 Welcome Back to LinkSpire! Let's Explore Together! 🚀"
+    );
   }
 
   async sendForgotPassword() {
-    await this.send("forgotPassword", "");
+    await this.send(
+      "forgotPassword",
+      "🤔 Forgot Your Password? Let's Get You Back In! 🔐"
+    );
+  }
+
+  async sendPasswordResetSuccess() {
+    await this.send(
+      "passwordResetSuccess",
+      "🎉 Your LinkSpire Password Has Been Successfully Reset! 🔑"
+    );
   }
 }

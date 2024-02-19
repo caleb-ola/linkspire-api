@@ -1,0 +1,60 @@
+extends base
+
+block content
+  table(align='center' style='\
+  background-color: #fff;\
+  /* box-shadow: 0px 1px 22px 0px #3333331a; */\
+  text-align: center;\
+  border-radius: 0;\
+  width: 600px;\
+  margin: 0px auto 0px;\
+  ')
+    // CONTENT HEADER STARTS
+    tr
+      td(style='\
+      font-weight: 700;\
+      font-size: 1.8rem;\
+      color: #060016;\
+      padding-top: 0px;\
+      padding-bottom: 10px;\
+      ')
+        | 🎊 Welcome Back to LinkSpire! Let's Explore Together! 🚀
+    // CONTENT HEADER ENDS
+    // CONTENT BODY STARTS
+    tr(style='text-align: left; color: #4f4f4f;')
+      td(style='padding: 0 50px')
+        p Hi {{Firstname}},
+
+        p(style='margin-top: 5px; word-break: break-word;')
+          | Welcome back to LinkSpire!  🎊 You've successfully logged in to your LinkSpire account and we're excited to see you back in action. 
+          | Let's dive right back into exploring and organizing your favorite links together!
+        p(style='margin-top: 10px; word-break: break-word; font-weight: bold; font-weight: 700; font-size: 1rem')
+          | Login Details:
+        p(style='word-break: break-word; margin-left:0px; padding-left:0px;')
+          span(style='font-weight: 600')
+            | Date and Time: 
+          | [Date and Time]
+        p(style='word-break: break-word; margin-left:0px; padding-left:0px;')
+          span(style='font-weight: 600')
+            | Location: 
+          | [City, Country]
+        p(style='word-break: break-word; margin-left:0px; padding-left:0px;')
+          span(style='font-weight: 600')
+            | Device: 
+          | [Device Type]
+        p(style='word-break: break-word; margin-left:0px; padding-left:0px;')
+          span(style='font-weight: 600')
+            | Browser:
+          | [Browser Name and Version]       
+        p(style='word-break: break-word;')
+          | If this login was authorized by you, you can disregard this email. However, if you notice any suspicious activity, please contact us immediately at support@linkspire.com.
+
+        p If you have any questions or need a guiding hand, feel free to reach out to our friendly support team. We're here to ensure you have a smooth sailing experience with LinkSpire.
+
+    tr(style='text-align: left; color: #4f4f4f')
+      td(style='padding: 0 50px')
+        p(style='padding-bottom: 35px')
+          | Happy linking!, 
+          br
+          | The LinkSpire Team.
+    // CONTENT BODY ENDS
