@@ -93,7 +93,7 @@ export const login: RequestHandler = AsyncHandler(async (req, res, next) => {
   if (!existingUser) throw new BadRequestError("Email or password incorrect");
 
   // Check if user has verified email
-  if (existingUser.isVerified)
+  if (!existingUser.isVerified)
     throw new BadRequestError(
       "We sent a verification to your email, please verify your email or proceed to resend verification."
     );
@@ -105,13 +105,13 @@ export const login: RequestHandler = AsyncHandler(async (req, res, next) => {
     );
 
   // Check if password is correct
-  const correctPassword = existingUser.checkPassword(
+  const correctPassword = await existingUser.checkPassword(
     password,
     existingUser.password
   );
 
   if (!correctPassword)
-    throw new BadRequestError("Username or password incorrect");
+    throw new BadRequestError("Email or password incorrect");
 
   await new Email(existingUser, "").welcomeBack();
 
@@ -148,7 +148,7 @@ export const resendVerification: RequestHandler = AsyncHandler(
 );
 
 // Login a user after verifying their email and send welcome (new user) email
-export const verifyEmail: RequestHandler = AsyncHandler(
+export const emailVerification: RequestHandler = AsyncHandler(
   async (req, res, next) => {
     const { token } = req.body;
     if (!token) throw new BadRequestError("Token is required");
@@ -256,13 +256,13 @@ export const resetPassword: RequestHandler = AsyncHandler(
 // Change user password
 export const updatePassword = AsyncHandler(
   async (req: CustomRequest, res: Response, next: NextFunction) => {
-    const { oldPassword, password, confirmPassword } = req.body;
+    const { password, newPassword, confirmNewPassword } = req.body;
 
-    if (!oldPassword) throw new BadRequestError("Old password is required");
     if (!password) throw new BadRequestError("Password is required");
-    if (!confirmPassword)
+    if (!newPassword) throw new BadRequestError("New password is required");
+    if (!confirmNewPassword)
       throw new BadRequestError("Confirm password is required");
-    if (password !== confirmPassword)
+    if (newPassword !== confirmNewPassword)
       throw new BadRequestError("Passwords do not match");
 
     const { currentUser } = req;
@@ -275,10 +275,10 @@ export const updatePassword = AsyncHandler(
     if (!user) throw new BadRequestError("Invalid token, please log in again.");
 
     // check if old password is correct
-    const passwordCheck = user.checkPassword(oldPassword, user.password);
+    const passwordCheck = user.checkPassword(password, user.password);
     if (!passwordCheck) throw new BadRequestError("Password is incorrect");
 
-    user.password = password;
+    user.password = newPassword;
     user.passwordChangedAt = Date.now();
 
     await new Email(user, "").sendPasswordResetSuccess();
@@ -290,21 +290,27 @@ export const updatePassword = AsyncHandler(
 );
 
 // Send test email
-export const sendTestEmail = AsyncHandler(async (req, res, next) => {
-  const user = {
-    firstName: "Dola",
-    email: "dolabomi_enuzh@mailsac.com",
-    username: "Dola Baba",
-    slug: "dola",
-    role: "user",
-  };
+export const sendTestEmail: RequestHandler = AsyncHandler(
+  async (req, res, next) => {
+    const user = {
+      name: "Dola Agba",
+      email: "dolabomi_enuzh@mailsac.com",
+      username: "Dola Baba",
+      slug: "dola-agba",
+      role: "user",
+    };
 
-  await new Email(user, "").welcomeBack();
+    // await new Email(user, "").welcomeBack();
+    // await new Email(user, "").welcome();
+    // await new Email(user, "").sendEmailVerification();
+    // await new Email(user, "").sendPasswordResetSuccess();
+    // await new Email(user, "").sendForgotPassword();
 
-  res.status(200).json({
-    status: "success",
-    data: {
-      message: "Test email sent succesfully.",
-    },
-  });
-});
+    res.status(200).json({
+      status: "success",
+      data: {
+        message: "Test email sent succesfully.",
+      },
+    });
+  }
+);

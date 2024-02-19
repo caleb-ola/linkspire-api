@@ -108,6 +108,14 @@ userSchema.pre("save", function (next) {
   next();
 });
 
+// Hash password
+userSchema.pre("save", async function (next) {
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 12);
+  }
+  next();
+});
+
 // Update the slug once a user changes their name
 userSchema.pre("findOneAndUpdate", function (next) {
   // Accessing the update object
@@ -144,7 +152,7 @@ userSchema.methods.changedPasswordAfter = function (
 userSchema.methods.createPasswordResetToken = function () {
   const resetToken = crypto.randomBytes(32).toString("hex");
 
-  this.passwordRestToken = crypto
+  this.passwordResetToken = crypto
     .createHash("sha256")
     .update(resetToken)
     .digest("hex");

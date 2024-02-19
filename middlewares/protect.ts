@@ -48,3 +48,5 @@ const protect = AsyncHandler(
     next();
   }
 );
+
+export default protect;
