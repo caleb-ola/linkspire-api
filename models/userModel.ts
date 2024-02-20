@@ -7,6 +7,7 @@ import crypto from "crypto";
 export interface UserTypes extends mongoose.Document {
   name: string;
   email: string;
+  username: string;
   bio: string;
   image: string;
   bannerImage: string;
@@ -37,6 +38,13 @@ const userSchema = new mongoose.Schema<UserTypes>(
       type: String,
       required: [true, "Name is required"],
       max: [60, "Name cannot be more than 60 characters"],
+    },
+    username: {
+      type: String,
+      unique: true,
+      required: [true, "Username is required"],
+      max: [60, "Username cannot be more than 60 characters"],
+      lower: true,
     },
     email: {
       type: String,
