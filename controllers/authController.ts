@@ -7,6 +7,7 @@ import User from "../models/userModel";
 import BadRequestError from "../Errors/badRequestError";
 import Email from "../utils/Email";
 import crypto from "crypto";
+import { createRandomUsername } from "../utils/commons";
 
 interface CustomRequest extends Request {
   currentUser?: any;
@@ -62,6 +63,7 @@ export const signup: RequestHandler = AsyncHandler(async (req, res, next) => {
     email,
     password,
     role: "user",
+    username: createRandomUsername(name, 12),
   });
 
   // Generate a verification token for the user
