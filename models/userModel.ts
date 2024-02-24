@@ -1,4 +1,4 @@
-import mongoose, { Query } from "mongoose";
+import mongoose, { Query, Schema } from "mongoose";
 import slugify from "slugify";
 import validator from "validator";
 import bcrypt from "bcrypt";
@@ -20,6 +20,7 @@ export interface UserTypes extends mongoose.Document {
   passwordResetToken: string | undefined;
   passwordResetExpires: string | undefined;
   isVerified: boolean;
+  links: Array<{ type: Schema.Types.ObjectId; ref: "Link" }>;
   active: boolean;
   verificationToken: string | undefined;
   verificationTokenExpires: string | undefined;
@@ -55,6 +56,7 @@ const userSchema = new mongoose.Schema<UserTypes>(
     },
     bio: {
       type: String,
+      max: [200, "Bio cannot be more than 200 characters"],
     },
     image: String,
     bannerImage: String,
@@ -66,6 +68,7 @@ const userSchema = new mongoose.Schema<UserTypes>(
       type: String,
       enum: ["male", "female", "others"],
     },
+    links: [{ type: Schema.Types.ObjectId, ref: "Link" }],
     slug: String,
     lastLogin: Date,
     password: {

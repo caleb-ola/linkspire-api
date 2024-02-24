@@ -94,3 +94,28 @@ export const getUserByUsername: RequestHandler = AsyncHandler(
     });
   }
 );
+
+export const updateUserProfile: RequestHandler = AsyncHandler(
+  async (req: CustomRequest, res, next) => {
+    const { username, name, bio, gender } = req.body;
+
+    const { currentUser } = req;
+
+    const user = await User.findOne({ username: req.params.username });
+    if (!user) throw new BadRequestError("User not found");
+
+    if (username) user.username = username;
+    if (name) user.name = name;
+    if (bio) user.bio = bio;
+    if (gender) user.gender = gender;
+
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        data: user,
+      },
+    });
+  }
+);
