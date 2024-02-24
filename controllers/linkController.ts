@@ -30,6 +30,8 @@ export const createLink: RequestHandler = AsyncHandler(
 
     usr.links.push(newLink.id);
 
+    await usr.save();
+
     res.status(200).json({
       status: "success",
       data: {

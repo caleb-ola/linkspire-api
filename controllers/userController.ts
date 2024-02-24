@@ -3,6 +3,7 @@ import AsyncHandler from "../utils/asyncHandler";
 import User from "../models/userModel";
 import BadRequestError from "../Errors/badRequestError";
 import APIFeatures from "../utils/apiFeatures";
+import NotAuthorizedError from "../Errors/notAuthorizedError";
 
 interface CustomRequest extends Request {
   currentUser?: any;
@@ -100,8 +101,9 @@ export const updateUserProfile: RequestHandler = AsyncHandler(
     const { username, name, bio, gender } = req.body;
 
     const { currentUser } = req;
+    if (!currentUser) throw new NotAuthorizedError("Not authorized.");
 
-    const user = await User.findOne({ username: req.params.username });
+    const user = await User.findById(currentUser.id);
     if (!user) throw new BadRequestError("User not found");
 
     if (username) user.username = username;

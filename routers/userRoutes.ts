@@ -16,6 +16,6 @@ router.get("/user/:id", getUserById);
 router.get("/user", getUserByEmail);
 router.get("/username/:username", getUserByUsername);
 router.get("/current-user", protect, getCurrentUser);
-router.get("/update-user/:username", protect, updateUserProfile);
+router.patch("/update-user", protect, updateUserProfile);
 
 export default router;
