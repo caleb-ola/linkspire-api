@@ -32,7 +32,7 @@ export const createLink: RequestHandler = AsyncHandler(
     usr.links.push(newLink.id);
     await usr.save();
 
-    res.status(200).json({
+    res.status(201).json({
       status: "success",
       data: {
         message: "Link added successfully",
@@ -65,10 +65,7 @@ export const getSingleUserLink: RequestHandler = AsyncHandler(
     const { currentUser } = req;
     if (!currentUser) throw new BadRequestError("You are not logged in");
 
-    if (!currentUser.links.includes(id))
-      throw new NotAuthorizedError("You can only view your links");
-
-    const userLink = await Link.findById(id);
+    const userLink = await Link.findOne({ _id: id, user: currentUser.id });
     if (!userLink) throw new BadRequestError("Link not found");
 
     res.status(200).json({
@@ -80,12 +77,51 @@ export const getSingleUserLink: RequestHandler = AsyncHandler(
   }
 );
 
-export const updateLink: RequestHandler = AsyncHandler(
+export const updateUserLink: RequestHandler = AsyncHandler(
   async (req: CustomRequest, res, next) => {
     const { title, url, description } = req.body;
     const { id } = req.params;
 
     const { currentUser } = req;
     if (!currentUser) throw new BadRequestError("You are not logged in");
+
+    const updatedLink = await Link.findOneAndUpdate(
+      { _id: id, user: currentUser.id },
+      {
+        title,
+        url,
+        description,
+      },
+      {
+        new: true,
+      }
+    );
+    if (!updatedLink) throw new BadRequestError("Link not found");
+
+    await updatedLink.save();
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        data: updatedLink,
+      },
+    });
+  }
+);
+
+export const deleteUserLink: RequestHandler = AsyncHandler(
+  async (req: CustomRequest, res, next) => {
+    const { id } = req.params;
+    const { currentUser } = req;
+
+    const deletedLink = await Link.findOneAndDelete({
+      _id: id,
+      user: currentUser.id,
+    });
+    if (!deletedLink) throw new BadRequestError("Link not found");
+
+    res.status(204).json({
+      status: "success",
+    });
   }
 );

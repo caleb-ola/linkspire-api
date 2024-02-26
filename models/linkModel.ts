@@ -32,6 +32,9 @@ const LinkSchema = new mongoose.Schema<LinkTypes>(
     timestamps: true,
     toObject: {
       virtuals: true,
+    },
+    toJSON: {
+      virtuals: true,
       transform(doc, rect) {
         rect.id = rect._id;
         delete rect.__v;
