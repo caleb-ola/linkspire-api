@@ -24,6 +24,12 @@ interface ENV {
   BREVO_PASSWORD: string;
   BREVO_KEY: string;
 
+  BUCKET_NAME: string;
+  BUCKET_ACCESS_KEY: string;
+  BUCKET_SECRET_KEY: string;
+  BUCKET_REGION: string;
+  BUCKET_LOCATION: string;
+
   APP_NAME: string;
   APP_EMAIL_FROM: string;
   APP_URL: string;
@@ -51,6 +57,12 @@ const Config = (): ENV => {
     BREVO_USERNAME: process.env.BREVO_USERNAME as string,
     BREVO_PASSWORD: process.env.BREVO_PASSWORD as string,
     BREVO_KEY: process.env.BREVO_KEY as string,
+
+    BUCKET_NAME: process.env.BUCKET_NAME as string,
+    BUCKET_ACCESS_KEY: process.env.BUCKET_ACCESS_KEY as string,
+    BUCKET_SECRET_KEY: process.env.BUCKET_SECRET_KEY as string,
+    BUCKET_REGION: process.env.BUCKET_REGION as string,
+    BUCKET_LOCATION: process.env.BUCKET_LOCATION as string,
 
     APP_NAME: process.env.APP_NAME as string,
     APP_EMAIL_FROM: process.env.APP_EMAIL_FROM as string,

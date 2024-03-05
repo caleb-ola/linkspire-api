@@ -4,10 +4,9 @@ import User from "../models/userModel";
 import BadRequestError from "../Errors/badRequestError";
 import APIFeatures from "../utils/apiFeatures";
 import NotAuthorizedError from "../Errors/notAuthorizedError";
-
-interface CustomRequest extends Request {
-  currentUser?: any;
-}
+import { CustomRequest } from "../utils/types";
+import { s3UploadV3 } from "../services/cloudUpload";
+import config from "../config";
 
 export const getCurrentUser = AsyncHandler(
   async (req: CustomRequest, res: Response, next: NextFunction) => {
@@ -118,6 +117,103 @@ export const updateUserProfile: RequestHandler = AsyncHandler(
       data: {
         data: user,
       },
+    });
+  }
+);
+
+export const updateUserAvatar: RequestHandler = AsyncHandler(
+  async (req: CustomRequest, res, next) => {
+    const { currentUser } = req;
+
+    const result = await s3UploadV3(req, "avatars", currentUser?.avatar);
+    // console.log({ result });
+    const location = `${config.BUCKET_LOCATION}/${result.key}`;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      currentUser.id,
+      { avatar: location },
+      { new: true }
+    );
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        data: updatedUser,
+      },
+    });
+  }
+);
+
+export const updateUserBanner: RequestHandler = AsyncHandler(
+  async (req: CustomRequest, res, next) => {
+    const { currentUser } = req;
+
+    const result = await s3UploadV3(req, "banners", currentUser?.bannerImage);
+
+    const location = `${config.BUCKET_LOCATION}/${result.key}`;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      currentUser.id,
+      { bannerImage: location },
+      { new: true }
+    );
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        data: updatedUser,
+      },
+    });
+  }
+);
+
+export const deactivateUser: RequestHandler = AsyncHandler(
+  async (req, res, next) => {
+    const { username } = req.params;
+
+    const user = await User.findOne({ username }).select("+active");
+    if (!user) throw new BadRequestError("User not found");
+
+    user.active = false;
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        data: user,
+      },
+    });
+  }
+);
+
+export const activateUser: RequestHandler = AsyncHandler(
+  async (req, res, next) => {
+    const { username } = req.params;
+
+    const user = await User.findOne({ username }).select("+active");
+    if (!user) throw new BadRequestError("User not found");
+
+    user.active = true;
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        data: user,
+      },
+    });
+  }
+);
+
+export const deleteUser: RequestHandler = AsyncHandler(
+  async (req, res, next) => {
+    const { id } = req.params;
+
+    const user = await User.findByIdAndDelete(id);
+    if (!user) throw new BadRequestError("User not found");
+
+    res.status(204).json({
+      status: "success",
     });
   }
 );

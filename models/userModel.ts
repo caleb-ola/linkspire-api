@@ -9,7 +9,7 @@ export interface UserTypes extends mongoose.Document {
   email: string;
   username: string;
   bio: string;
-  image: string;
+  avatar: string;
   bannerImage: string;
   role: string;
   gender: string;
@@ -58,7 +58,7 @@ const userSchema = new mongoose.Schema<UserTypes>(
       type: String,
       max: [200, "Bio cannot be more than 200 characters"],
     },
-    image: String,
+    avatar: String,
     bannerImage: String,
     role: {
       type: String,

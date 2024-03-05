@@ -7,7 +7,7 @@ import User from "../models/userModel";
 import BadRequestError from "../Errors/badRequestError";
 import Email from "../utils/Email";
 import crypto from "crypto";
-import { createRandomUsername } from "../utils/commons";
+import { createRandomUsername } from "../utils/casuals";
 
 interface CustomRequest extends Request {
   currentUser?: any;
