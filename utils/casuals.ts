@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import slugify from "slugify";
+import config from "../config";
 
 export const createRandomUsername = (username: string, length: number = 6) => {
   const randomSuffix = crypto.randomBytes(length).toString("hex");
@@ -40,4 +41,15 @@ export const extractFileNameFromUrl = (url: string) => {
   // const removedFileNameSuffixes = fileName.split("-")[0];
 
   return removedFileNameQueries;
+};
+export const convertSpacesToHyphen = (str: string) => {
+  return str.replace(/\s+/g, "-");
+};
+
+export const generateUniqueShortUrl = (alias: string, id: string) => {
+  const randomString = crypto.randomBytes(5).toString("hex");
+  const shortId = id.slice(id.length - 5, id.length);
+
+  const shortUrl = `${config.APP_URL}/${alias}/${randomString}${shortId}`;
+  return shortUrl;
 };

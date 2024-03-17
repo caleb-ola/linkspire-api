@@ -4,7 +4,7 @@ import validator from "validator";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 
-export interface UserTypes extends mongoose.Document {
+interface UserTypes extends mongoose.Document {
   name: string;
   email: string;
   username: string;
