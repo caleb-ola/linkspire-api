@@ -1,7 +1,7 @@
+import { CustomRequest } from "./../utils/types";
 import { RequestHandler } from "express";
 import AsyncHandler from "../utils/asyncHandler";
 import Short from "../models/shortsModel";
-import { CustomRequest } from "../utils/types";
 import { generateUniqueShortUrl } from "../utils/casuals";
 import BadRequestError from "../Errors/badRequestError";
 
@@ -43,5 +43,82 @@ export const createShort: RequestHandler = AsyncHandler(
         },
       });
     }
+  }
+);
+
+export const getAllShorts: RequestHandler = AsyncHandler(
+  async (req, res, next) => {
+    const shorts = await Short.find();
+
+    res.status(200).json({
+      status: "success",
+      results: shorts.length,
+      data: {
+        data: shorts,
+      },
+    });
+  }
+);
+
+export const getShort: RequestHandler = AsyncHandler(
+  async (req: CustomRequest, res, next) => {
+    const { id } = req.params;
+
+    const { currentUser } = req;
+
+    const short = await Short.findOne({ _id: id, user: currentUser._id });
+    if (!short) throw new BadRequestError("Shortened link not found");
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        data: short,
+      },
+    });
+  }
+);
+
+export const updateShort: RequestHandler = AsyncHandler(
+  async (req: CustomRequest, res, next) => {
+    const { id } = req.params;
+    const { destination, title, customAlias, addToLinks } = req.body;
+    const { currentUser } = req;
+
+    const short = await Short.findOne({
+      _id: id,
+      user: currentUser._id,
+    });
+    if (!short) throw new BadRequestError("Shortened link not found.");
+
+    short.destination = destination;
+    short.title = title;
+    short.addToLinks = addToLinks;
+
+    short.save();
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        data: short,
+      },
+    });
+  }
+);
+
+export const deleteShort: RequestHandler = AsyncHandler(
+  async (req: CustomRequest, res, next) => {
+    const { id } = req.params;
+
+    const { currentUser } = req;
+
+    const deleteShort = await Short.findOneAndDelete({
+      _id: id,
+      user: currentUser._id,
+    });
+    if (!deleteShort) throw new BadRequestError("Shortened link not found");
+
+    res.status(204).json({
+      status: "success",
+    });
   }
 );
