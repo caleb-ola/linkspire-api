@@ -21,7 +21,10 @@ const ShortSchema = new mongoose.Schema<ShortTypes>(
       type: String,
       max: [40, "Title cannot be more than 40 characters"],
     },
-    addToLinks: Boolean,
+    addToLinks: {
+      type: Boolean,
+      default: false,
+    },
     clicks: Number,
     successfulRedirects: Number,
     user: {
