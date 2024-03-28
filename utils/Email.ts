@@ -2,6 +2,13 @@ import config from "../config";
 import nodemailer from "nodemailer";
 import pug from "pug";
 import { convert } from "html-to-text";
+import { userLoginInfo } from "./types";
+
+interface EmailInfo {
+  subject: string;
+  userInfo?: userLoginInfo;
+  resetUrl?: string;
+}
 
 export default class Email {
   public to: string;
@@ -38,20 +45,22 @@ export default class Email {
     }
   }
 
-  async send(template: string, subject: string) {
+  async send(template: string, info: EmailInfo) {
     const html = pug.renderFile(
       `${__dirname}/../views/emails/${template}.pug`,
       {
         url: this.url,
         firstname: this.firstname,
-        subject,
+        subject: info.subject,
+        userInfo: info.userInfo,
+        resetUrl: info.resetUrl,
       }
     );
 
     const mailOptions = {
       from: this.from,
       to: this.to,
-      subject,
+      subject: info.subject,
       html,
       text: convert(html),
     };
@@ -60,34 +69,34 @@ export default class Email {
   }
 
   async sendEmailVerification() {
-    await this.send(
-      "verify",
-      "🚀 Welcome to LinkSpire! Please Verify Your Email 📧"
-    );
+    await this.send("verify", {
+      subject: "🚀 Welcome to LinkSpire! Please Verify Your Email 📧",
+    });
   }
 
   async welcome() {
-    await this.send("welcome", "🚀 Welcome to LinkSpire! Let's Dive In! 📚");
+    await this.send("welcome", {
+      subject: "🚀 Welcome to LinkSpire! Let's Dive In! 📚",
+    });
   }
 
-  async welcomeBack() {
-    await this.send(
-      "welcomeBack",
-      "🎊 Welcome Back to LinkSpire! Let's Explore Together! 🚀"
-    );
+  async welcomeBack(userInfo: userLoginInfo, resetUrl: string) {
+    await this.send("welcomeBack", {
+      subject: "🎊 Welcome Back to LinkSpire! Let's Explore Together! 🚀",
+      userInfo,
+      resetUrl,
+    });
   }
 
   async sendForgotPassword() {
-    await this.send(
-      "forgotPassword",
-      "🤔 Forgot Your Password? Let's Get You Back In! 🔐"
-    );
+    await this.send("forgotPassword", {
+      subject: "🤔 Forgot Your Password? Let's Get You Back In! 🔐",
+    });
   }
 
   async sendPasswordResetSuccess() {
-    await this.send(
-      "passwordResetSuccess",
-      "🎉 Your LinkSpire Password Has Been Successfully Reset! 🔑"
-    );
+    await this.send("passwordResetSuccess", {
+      subject: "🎉 Your LinkSpire Password Has Been Successfully Reset! 🔑",
+    });
   }
 }

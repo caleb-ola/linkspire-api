@@ -25,27 +25,28 @@ block content
         p Hi #{firstname},
 
         p(style='margin-top: 5px; word-break: break-word;')
-          | Welcome back to LinkSpire!  🎊 You've successfully logged in to your LinkSpire account and we're excited to see you back in action. 
-        p(style='margin-top: 10px; word-break: break-word; font-weight: bold; font-weight: 700; font-size: 1rem')
-          | Login Details:
+          | Welcome back to LinkSpire!  🎊 You've successfully logged in to your LinkSpire account and we're excited to see you back in action. Here are your login details:
+
         p(style='word-break: break-word; margin-left:0px; padding-left:0px;')
           span(style='font-weight: 600')
-            | Date and Time: 
-          | [Date and Time]
+            | Date and Time: #{userInfo.time}
         p(style='word-break: break-word; margin-left:0px; padding-left:0px;')
           span(style='font-weight: 600')
-            | Location: 
-          | [City, Country]
+            | Location:  #{userInfo.location}
         p(style='word-break: break-word; margin-left:0px; padding-left:0px;')
           span(style='font-weight: 600')
-            | Device: 
-          | [Device Type]
+            | OS:  #{userInfo.os}
         p(style='word-break: break-word; margin-left:0px; padding-left:0px;')
           span(style='font-weight: 600')
-            | Browser:
-          | [Browser Name and Version]       
+            | Device: #{userInfo.device}
+        p(style='word-break: break-word; margin-left:0px; padding-left:0px;')
+          span(style='font-weight: 600')
+            | Browser: #{userInfo.browser}       
         p(style='word-break: break-word;')
-          | If this login was authorized by you, you can disregard this email. However, if you notice any suspicious activity, please contact us immediately at support@linkspire.com.
+          | If this login was authorized by you, you can disregard this email. However, if you notice any suspicious activity, please  
+          a( href=`${resetUrl}` style="font-weight: 600") 
+            | change your password 
+          | or contact us immediately at support@linkspire.com
 
     tr(style='text-align: left; color: #4f4f4f')
       td(style='padding: 0 50px')

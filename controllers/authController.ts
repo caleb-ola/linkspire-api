@@ -8,10 +8,7 @@ import BadRequestError from "../Errors/badRequestError";
 import Email from "../utils/Email";
 import crypto from "crypto";
 import { createRandomUsername } from "../utils/casuals";
-
-interface CustomRequest extends Request {
-  currentUser?: any;
-}
+import { CustomRequest } from "../utils/types";
 
 // Generate a token
 const generateToken = (id: string, email: string) => {
@@ -85,40 +82,45 @@ export const signup: RequestHandler = AsyncHandler(async (req, res, next) => {
 });
 
 // Log in an existing user and Send welcome back mail after succesful login
-export const login: RequestHandler = AsyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
+export const login: RequestHandler = AsyncHandler(
+  async (req: CustomRequest, res, next) => {
+    const { email, password } = req.body;
 
-  // Check if user exists
-  const existingUser = await User.findOne({ email }).select(
-    "+password +active"
-  );
-  if (!existingUser) throw new BadRequestError("Email or password incorrect");
+    // Check if user exists
+    const existingUser = await User.findOne({ email }).select(
+      "+password +active"
+    );
+    if (!existingUser) throw new BadRequestError("Email or password incorrect");
 
-  // Check if user has verified email
-  if (!existingUser.isVerified)
-    throw new BadRequestError(
-      "We sent a verification to your email, please verify your email or proceed to resend verification."
+    // Check if user has verified email
+    if (!existingUser.isVerified)
+      throw new BadRequestError(
+        "We sent a verification to your email, please verify your email or proceed to resend verification."
+      );
+
+    // Check if user's account has been deactivated
+    if (!existingUser.active)
+      throw new BadRequestError(
+        "Your account has been deactivated, please contact support"
+      );
+
+    // Check if password is correct
+    const correctPassword = await existingUser.checkPassword(
+      password,
+      existingUser.password
     );
 
-  // Check if user's account has been deactivated
-  if (!existingUser.active)
-    throw new BadRequestError(
-      "Your account has been deactivated, please contact support"
+    if (!correctPassword)
+      throw new BadRequestError("Email or password incorrect");
+
+    await new Email(existingUser, "").welcomeBack(
+      req.userInfo,
+      `${config.APP_URL}/auth/forgot-password`
     );
 
-  // Check if password is correct
-  const correctPassword = await existingUser.checkPassword(
-    password,
-    existingUser.password
-  );
-
-  if (!correctPassword)
-    throw new BadRequestError("Email or password incorrect");
-
-  await new Email(existingUser, "").welcomeBack();
-
-  createSendToken(existingUser, 200, res);
-});
+    createSendToken(existingUser, 200, res);
+  }
+);
 
 // Re-send email verification link to user email
 export const resendVerification: RequestHandler = AsyncHandler(
