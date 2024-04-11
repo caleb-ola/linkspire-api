@@ -4,5 +4,5 @@ module.exports = {
   testEnvironment: "node",
   verbose: true, // Report each individual test during test run
   forceExit: true,
-  setupFiles: ["./__tests__/setup.test.js"],
+  setupFilesAfterEnv: ["./tests/setups/jest.setup.ts"],
 };

@@ -3,8 +3,12 @@ import mongoose from "mongoose";
 
 // Connect to the in-memory database
 beforeAll(async () => {
-  const mongoServer = await MongoMemoryServer.create();
-  await mongoose.connect(mongoServer.getUri());
+  try {
+    const mongoServer = await MongoMemoryServer.create();
+    await mongoose.connect(mongoServer.getUri());
+  } catch (error) {
+    console.log("Error connecting to mongoDB: " + error);
+  }
 });
 
 // Disconnect and close connection to in-memory database after test completion

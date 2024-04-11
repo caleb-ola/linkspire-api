@@ -109,7 +109,6 @@ const userSchema = new mongoose.Schema<UserTypes>(
 // Only return users that are active
 userSchema.pre(/^find/, function (this: Query<UserTypes[], UserTypes>, next) {
   this.find({ active: { $ne: false } });
-
   next();
 });
 
